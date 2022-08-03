@@ -7,6 +7,9 @@ WORKDIR /code/app/
 COPY ./requirements.txt /code/requirements.txt
 COPY ./database/calendar.db /code/app/database/calendar.db
 
+#
+
+EXPOSE 8080
 
 # 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
