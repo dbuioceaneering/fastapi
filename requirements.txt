@@ -1,0 +1,11 @@
+datetime
+numpy
+databases
+pandas
+Fastapi
+pydantic
+Starred
+start
+uvicorn
+aiosqlite
+requests
