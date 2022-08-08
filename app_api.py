@@ -6,6 +6,7 @@ from databases import Database
 from pydantic import BaseModel
 from datetime import datetime
 from function import next5days, back5days, import_date
+from function_get import get_event_in_month
 
 database = Database("sqlite:///database/calendar.db")
 
@@ -46,6 +47,14 @@ async def fetch_data(year: year):
     # results = await database.fetch_all(query=query)
     results = import_date(year.year)
     return  results
+
+@app.get("/events_in_month")
+async def fetch_data():
+    # query = "select * from date where datekey between '2019-01-01' and '2019-02-01' and isholiday = 0"
+    # results = await database.fetch_all(query=query)
+    get_event_in_month()
+    file_path = "Event_in_month.xlsx"
+    return FileResponse(path=file_path, filename=file_path)
 
 # @app.get("/test") #> Get method with param
 # async def fetch_data(startDate: str):
