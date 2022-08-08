@@ -56,27 +56,3 @@ async def fetch_data():
     get_event_in_month()
     file_path = "Event_in_month.xlsx"
     return FileResponse(path=file_path, filename=file_path)
-
-# @app.get("/test") #> Get method with param
-# async def fetch_data(startDate: str):
-#     # query = "select * from date where datekey between '2019-01-01' and '2019-02-01' and isholiday = 0"
-#     # results = await database.fetch_all(query=query)
-#     results = back5days(startDate)
-#     return  results
-
-# @app.post("/tradingdate/")
-# async def fetch_data(startdate: str):
-#     query = "select * from date where datekey between '{}' and '2020-01-01' and isholiday = 0".format(str(startdate))
-#     results = await database.fetch_all(query=query)
-#     return  results
-
-##################### Tinh T+5#######################
-# Request 20 ngay ke tu ngay nhap vao de lay mang trading date, lay 20 ngay de tranh roi vao cac ngay nghi le dai,co the dieu chinh sau do de phu hop hon. Lay ra next20days
-# Request de lay mang rang time 20 ngay
-# Dem phan tu trong mang. T+1 la phan tu thu tu la 1, tuong tu cho den T+5 la phan tu thu 5. Coi ngay nhap vao la T+0
-
-# @app.post("/next5days/")
-# async def fetch_data(startdate: str):
-#     query = "select * from date where datekey between '{}' and '2020-01-01' and isholiday = 0".format(str(startdate))
-#     results = await database.fetch_all(query=query)
-#     return  results
