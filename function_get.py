@@ -34,8 +34,8 @@ def get_event_in_month():
     given_date = datetime.date.today()
     first_day_of_month = given_date.replace(day=1)
     date_obj = first_day_of_month
-    fisrt_date = date_obj.strftime('%Y-%m-%d')
-    url = "https://finfo-api.vndirect.com.vn/v4/events?sort=code:asc~type:asc&q=locale:VN~group:investorRight,stockAlert~effectiveDate:{}&size=200".format(fisrt_date)
+    first_date = date_obj.strftime('%Y-%m-%d')
+    url = "https://finfo-api.vndirect.com.vn/v4/events?sort=code:asc~type:asc&q=locale:VN~group:investorRight,stockAlert~effectiveDate:{}&size=200".format(first_date)
     payload={}
     headers = {
     'Accept': '*/*',
