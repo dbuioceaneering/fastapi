@@ -86,7 +86,7 @@ def get_event_in_month():
         json1 = json1 + json_data
         
     stringdata = json.dumps(json1).encode('utf8')
-    with open("event_in_month.json", "w") as json_file:
+    with open("events_in_month.json", "w") as json_file:
         json_file.write(stringdata.decode('utf8'))
-    data = pandas.read_json('event_in_month.json')
-    data.to_excel("Event_in_month.xlsx")
+    data = pandas.read_json('events_in_month.json')
+    data.to_excel("Events_in_month.xlsx")
