@@ -27,7 +27,7 @@ def days_in_month():
         
     return array_day_in_month
 
-################## Get events in month ##########################
+################## Get events in month ###########################
 
 def get_event_in_month():
     array_days = days_in_month()
