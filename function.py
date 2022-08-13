@@ -25,7 +25,7 @@ def check_holiday(startDate):
 ##################### Tinh T+5 #######################
 # Request 20 ngay ke tu ngay nhap vao de lay mang trading date, lay 20 ngay de tranh roi vao cac ngay nghi le dai,co the dieu chinh sau do de phu hop hon. Lay ra next20days
 # Request de lay mang rang time 20 ngay
-# Dem phan tu trong mang. T+1 la phan tu thu tu la 1, tuong tu cho den T+5 la phan tu thu 5. Coi ngay nhap vao la T+0
+# Dem phan tu trong mang. T+1 la phan tu thu tu la 1, tuong tu cho den T+5 la phan tu thu 5. Coi ngay nhap vao la T+0.
 def next5days(startDate):
     result = []
     isholiday = check_holiday(startDate)
