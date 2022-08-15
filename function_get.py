@@ -9,6 +9,7 @@ import pandas
 import requests
 import json
 import calendar
+from dateutil import relativedelta
 
 ################### Number of days in month #####################
 
@@ -27,10 +28,30 @@ def days_in_month():
         
     return array_day_in_month
 
-################## Get events in month ##########################
+################### Number of days in month #####################
+
+def days_in_next_month():
+    now = datetime.datetime.now()
+    nextMonthDate = now + relativedelta.relativedelta(months=1, day=1)
+    num_of_next_month_days = calendar.monthrange(now.year, nextMonthDate.month)[1]
+    array_day_in_next_month = []
+    i = 0
+    while (i < num_of_next_month_days):
+        temp_array = []
+        i += 1
+        given_date = now + relativedelta.relativedelta(months=1, day=1)
+        first_day_of_month = given_date.replace(day=i)
+        temp_array.append(first_day_of_month)
+        array_day_in_next_month = array_day_in_next_month + temp_array
+        
+    return array_day_in_next_month
+
+################## Get event in month ##########################
 
 def get_event_in_month():
-    array_days = days_in_month()
+    array_days_this_month = days_in_month()
+    array_days_next_month = days_in_next_month()
+    array_days = array_days_this_month + array_days_next_month
     given_date = datetime.date.today()
     first_day_of_month = given_date.replace(day=1)
     date_obj = first_day_of_month
@@ -86,7 +107,7 @@ def get_event_in_month():
         json1 = json1 + json_data
         
     stringdata = json.dumps(json1).encode('utf8')
-    with open("events_in_month.json", "w") as json_file:
+    with open("events_in_2_month.json", "w") as json_file:
         json_file.write(stringdata.decode('utf8'))
-    data = pandas.read_json('events_in_month.json')
-    data.to_excel("Events_in_month.xlsx")
+    data = pandas.read_json('events_in_2_month.json')
+    data.to_excel("Events_in_2_month.xlsx")
