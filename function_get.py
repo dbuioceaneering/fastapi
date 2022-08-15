@@ -86,4 +86,3 @@ def get_event_in_month():
         json_file.write(stringdata.decode('utf8'))
     data = pandas.read_json('Events_in_2_months.json')
     data.to_excel("Events_in_2_months.xlsx")
-######################
