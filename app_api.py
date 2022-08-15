@@ -54,7 +54,7 @@ async def fetch_data():
     # query = "select * from date where datekey between '2019-01-01' and '2019-02-01' and isholiday = 0"
     # results = await database.fetch_all(query=query)
     get_event_in_month()
-    file_path = "Event_in_month.xlsx"
+    file_path = "Events_in_2_months.xlsx"
     return FileResponse(path=file_path, filename=file_path)
 
 # @app.get("/test") #> Get method with param
