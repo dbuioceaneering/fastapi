@@ -29,7 +29,7 @@ def days_in_month():
         
     return array_day_in_month
 
-################## Get events in month ###########################
+################### Number of days in next month #####################
 
 def days_in_next_month():
     now = datetime.datetime.now()
