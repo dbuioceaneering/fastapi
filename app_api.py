@@ -42,12 +42,12 @@ async def fetch_data(startDate: startDate):
     results = back5days(startDate.startDate)
     return  results
 
-@app.post("/importdates")
-async def fetch_data(year: year):
-    # query = "select * from date where datekey between '2019-01-01' and '2019-02-01' and isholiday = 0"
-    # results = await database.fetch_all(query=query)
-    results = import_date(year.year)
-    return  results
+# @app.post("/importdates")
+# async def fetch_data(year: year):
+#     # query = "select * from date where datekey between '2019-01-01' and '2019-02-01' and isholiday = 0"
+#     # results = await database.fetch_all(query=query)
+#     results = import_date(year.year)
+#     return  results
 
 @app.get("/events_in_month")
 async def fetch_data():
