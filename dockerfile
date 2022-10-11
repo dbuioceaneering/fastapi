@@ -1,5 +1,5 @@
-FROM python:3.9
-
+#FROM python:3.9
+FROM bitnami/python
 # 
 WORKDIR /code/app/
 
@@ -14,5 +14,5 @@ COPY . /code/app
 # 
 CMD ["uvicorn", "app_api:app", "--host", "0.0.0.0", "--port", "8080"]
 #
-CMD ["uvicorn", "app_api:app", "--host", "0.0.0.0", "--port", "8080"]
+#CMD ["uvicorn", "app_api:app", "--host", "0.0.0.0", "--port", "8080"]
 #CMD exec uvicorn app_api:app --host 0.0.0.0 --port ${PORT}
