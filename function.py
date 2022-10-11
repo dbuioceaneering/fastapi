@@ -10,7 +10,7 @@ import json
 import calendar
 
 database = Database("sqlite:///database/calendar.db")
-con = sqlite3.connect('database/calendar.db')
+con = sqlite3.connect('database\calendar.db')
 
 
 def check_holiday(startDate):
