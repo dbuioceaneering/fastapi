@@ -10,7 +10,9 @@ import json
 import calendar
 
 database = Database("sqlite:///database/calendar.db")
-con = sqlite3.connect('database/calendar.db')
+data_path = "database\\"
+con = sqlite3.connect(data_path +  "calendar.db")
+# con = sqlite3.connect('database\calendar.db')
 
 
 def check_holiday(startDate):
@@ -365,7 +367,7 @@ def rm_report_weekly(startDate):
     data = pandas.read_json('RM_Report.json')
     data.to_excel("RM_Report.xlsx")
 
-# rm_report_weekly("2022-10-15")
+# rm_report_weekly("2022-10-20")
 
 
 
