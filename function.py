@@ -7,11 +7,12 @@ import pandas
 import sqlite3
 import requests
 import json
-import calendar
+import os.path
 
 database = Database("sqlite:///database/calendar.db")
-data_path = "database\\"
-con = sqlite3.connect(data_path +  "calendar.db")
+data_path = os.path.join("database")
+file_open = os.path.join(data_path, "calendar.db")
+con = sqlite3.connect(file_open)
 # con = sqlite3.connect('database\calendar.db')
 
 
@@ -367,7 +368,7 @@ def rm_report_weekly(startDate):
     data = pandas.read_json('RM_Report.json')
     data.to_excel("RM_Report.xlsx")
 
-# rm_report_weekly("2022-10-20")
+# back5days("2022-10-20")
 
 
 
