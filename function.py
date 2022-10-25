@@ -235,7 +235,7 @@ def rm_report_weekly(startDate):
 
     rm_report = []
     for index, item in enumerate(arrStock):
-        print("Endpoint /rm_report, processing symbol {}".format(arrStock[index].stockSymbol))
+        print("Endpoint /rm_report, processing symbol {} - {}".format(arrStock[index].stockSymbol, datetime.now()))
 
         url_price = "https://restv2.fireant.vn/symbols/{}/historical-quotes?startDate={}&endDate={}&offset=0&limit=30".format(arrStock[index].stockSymbol,t6,t1)
 
