@@ -235,7 +235,7 @@ def rm_report_weekly(startDate):
 
     rm_report = []
     for index, item in enumerate(arrStock):
-        print("Endpoint /rm_report, processing symbol {} - {}".format(arrStock[index].stockSymbol, datetime.now()))
+        # print("Endpoint /rm_report, processing symbol {} - {}".format(arrStock[index].stockSymbol, datetime.now()))
 
         url_price = "https://restv2.fireant.vn/symbols/{}/historical-quotes?startDate={}&endDate={}&offset=0&limit=30".format(arrStock[index].stockSymbol,t6,t1)
 
@@ -369,13 +369,4 @@ def rm_report_weekly(startDate):
     data.to_excel("RM_Report.xlsx")
 
 # back5days("2022-10-20")
-
-
-
-
-
-
-
-
-            
-
+# rm_report_weekly("2022-11-07")
