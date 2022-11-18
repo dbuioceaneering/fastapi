@@ -57,6 +57,7 @@ def get_event_in_month():
     for index, item in enumerate(array_days):
         date_obj = item
         string_date = date_obj.strftime('%Y-%m-%d')
+        # print("Endpoint /events_in_month, processing date {}".format(string_date))
         url = "https://finfo-api.vndirect.com.vn/v4/events?sort=code:asc~type:asc&q=locale:VN~group:investorRight,stockAlert~effectiveDate:{}&size=200".format(string_date)
         payload={}
         headers = {
@@ -84,5 +85,8 @@ def get_event_in_month():
     stringdata = json.dumps(json1).encode('utf8')
     with open("Events_in_2_months.json", "w") as json_file:
         json_file.write(stringdata.decode('utf8'))
+    # data = pandas.read_json('Events_in_2_months.json').set_index('id')
     data = pandas.read_json('Events_in_2_months.json')
     data.to_excel("Events_in_2_months.xlsx")
+
+# get_event_in_month()
