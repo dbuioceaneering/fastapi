@@ -226,10 +226,11 @@ def rm_report_weekly(startDate):
     arrHNX = list()
     arrHSX = list()
     for index, item in enumerate(json_obj):
-        if item['exchange'] == 'HNX':
-            arrHNX.append(StockListHNX(stockSymbol=item['symbol'],name=item['name'],exchange=item['exchange']))
-        elif item['exchange'] == 'HSX':
-            arrHSX.append(StockListHSX(stockSymbol=item['symbol'],name=item['name'],exchange=item['exchange']))
+        if len(item['symbol']) == 3:
+            if item['exchange'] == 'HNX':
+                arrHNX.append(StockListHNX(stockSymbol=item['symbol'],name=item['name'],exchange=item['exchange']))
+            elif item['exchange'] == 'HSX':
+                arrHSX.append(StockListHSX(stockSymbol=item['symbol'],name=item['name'],exchange=item['exchange']))
     arrStock = arrHNX + arrHSX
 
 
@@ -368,37 +369,4 @@ def rm_report_weekly(startDate):
     data = pandas.read_json('RM_Report.json')
     data.to_excel("RM_Report.xlsx")
 
-# def noname():
-#     url = "https://wabi-south-east-asia-api.analysis.windows.net/public/reports/querydata?synchronous=true"
-
-#     payload = "{\"version\":\"1.0.0\",\"queries\":[{\"Query\":{\"Commands\":[{\"SemanticQueryDataShapeCommand\":{\"Query\":{\"Version\":2,\"From\":[{\"Name\":\"r\",\"Entity\":\"Room_Limit\",\"Type\":0}],\"Select\":[{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"r\"}},\"Property\":\"SYMBOL\"},\"Name\":\"Room_Limit.SYMBOL\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"r\"}},\"Property\":\"MRRATIOLOAN\"},\"Name\":\"Sum(Room_Limit.MRRATIOLOAN)\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"r\"}},\"Property\":\"ROOMREMAIN\"},\"Name\":\"Sum(Room_Limit.ROOMREMAIN)\"},{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"r\"}},\"Property\":\"MRPRICELOAN\"}},\"Function\":0},\"Name\":\"Sum(Room_Limit.MRPRICELOAN)\"}]},\"Binding\":{\"Primary\":{\"Groupings\":[{\"Projections\":[0,1,2,3]}]},\"DataReduction\":{\"DataVolume\":3,\"Primary\":{\"Window\":{\"Count\":500}}},\"Version\":1},\"ExecutionMetricsKind\":1}}]},\"CacheKey\":\"{\\\"Commands\\\":[{\\\"SemanticQueryDataShapeCommand\\\":{\\\"Query\\\":{\\\"Version\\\":2,\\\"From\\\":[{\\\"Name\\\":\\\"r\\\",\\\"Entity\\\":\\\"Room_Limit\\\",\\\"Type\\\":0}],\\\"Select\\\":[{\\\"Column\\\":{\\\"Expression\\\":{\\\"SourceRef\\\":{\\\"Source\\\":\\\"r\\\"}},\\\"Property\\\":\\\"SYMBOL\\\"},\\\"Name\\\":\\\"Room_Limit.SYMBOL\\\"},{\\\"Column\\\":{\\\"Expression\\\":{\\\"SourceRef\\\":{\\\"Source\\\":\\\"r\\\"}},\\\"Property\\\":\\\"MRRATIOLOAN\\\"},\\\"Name\\\":\\\"Sum(Room_Limit.MRRATIOLOAN)\\\"},{\\\"Column\\\":{\\\"Expression\\\":{\\\"SourceRef\\\":{\\\"Source\\\":\\\"r\\\"}},\\\"Property\\\":\\\"ROOMREMAIN\\\"},\\\"Name\\\":\\\"Sum(Room_Limit.ROOMREMAIN)\\\"},{\\\"Aggregation\\\":{\\\"Expression\\\":{\\\"Column\\\":{\\\"Expression\\\":{\\\"SourceRef\\\":{\\\"Source\\\":\\\"r\\\"}},\\\"Property\\\":\\\"MRPRICELOAN\\\"}},\\\"Function\\\":0},\\\"Name\\\":\\\"Sum(Room_Limit.MRPRICELOAN)\\\"}]},\\\"Binding\\\":{\\\"Primary\\\":{\\\"Groupings\\\":[{\\\"Projections\\\":[0,1,2,3]}]},\\\"DataReduction\\\":{\\\"DataVolume\\\":3,\\\"Primary\\\":{\\\"Window\\\":{\\\"Count\\\":500}}},\\\"Version\\\":1},\\\"ExecutionMetricsKind\\\":1}}]}\",\"QueryId\":\"\",\"ApplicationContext\":{\"DatasetId\":\"1e8088a6-2c84-4aa1-8651-7e70b917e9a8\",\"Sources\":[{\"ReportId\":\"93a501a1-883f-4608-8071-00f9ed5d654f\",\"VisualId\":\"803f54988a210e353453\"}]}}],\"cancelQueries\":[],\"modelId\":4371310}"
-#     headers = {
-#     'Accept': 'application/json, text/plain, */*',
-#     'Accept-Language': 'vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5',
-#     'ActivityId': '68d1ae90-2e3f-6f52-4dd4-132e593e6c8b',
-#     'Connection': 'keep-alive',
-#     'Content-Type': 'application/json;charset=UTF-8',
-#     'Origin': 'https://app.powerbi.com',
-#     'Referer': 'https://app.powerbi.com/',
-#     'RequestId': 'c3dff65a-f7f6-db7d-62ff-dc5453a8634d',
-#     'Sec-Fetch-Dest': 'empty',
-#     'Sec-Fetch-Mode': 'cors',
-#     'Sec-Fetch-Site': 'cross-site',
-#     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
-#     'X-PowerBI-ResourceKey': 'b43d15d8-5245-47e9-8e3d-19ce70182ca8',
-#     'sec-ch-ua': '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
-#     'sec-ch-ua-mobile': '?0',
-#     'sec-ch-ua-platform': '"macOS"'
-#     }
-
-#     response = requests.request("POST", url, headers=headers, data=payload)
-#     data1 = json.loads(response.text)
-#     data_array = data1['results'][0]['result']['data']['dsr']['DS'][0]['PH'][0]['DM0']
-#     tcb_dict = {
-#     'stockSymbol' : '',
-    
-#     }
-
-# noname()
-# back5days("2022-10-20")
-# rm_report_weekly("2022-11-07")
+# rm_report_weekly("2022-11-14")
