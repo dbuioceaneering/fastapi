@@ -22,7 +22,7 @@ def allsaturday(year):
 con = sqlite3.connect('calendar.db')
 cur = con.cursor()
 
-start_year = 2023 ## Dien nam can import data
+start_year = 2024 ## Dien nam can import data
 
 start_date = date(start_year, 1, 1) 
 end_date = date(start_year, 12, 31)    # perhaps date.now()
@@ -49,8 +49,8 @@ for d in allsundays(start_year):
 ## https://vsd.vn/vi/lich-giao-dich?tab=LICH_NGHI_GIAODICH&date=12/04/2022&page=1&ks=2023
 
 ####### Tet Tay ##############
-start_date_tettay = date(start_year, 1, 2) 
-end_date_tettay = date(start_year, 1, 2)    # perhaps date.now()
+start_date_tettay = date(start_year, 1, 1) 
+end_date_tettay = date(start_year, 1, 1)    # perhaps date.now()
 delta_tettay = end_date_tettay - start_date_tettay   # returns timedelta
 
 for i in range(delta_tettay.days + 1):
@@ -62,8 +62,8 @@ for i in range(delta_tettay.days + 1):
 
 
 ####### Tet Ta #############
-start_date_tetta = date(start_year, 1, 20) # Ngay bat dau tet ta
-end_date_tetta = date(start_year, 1, 26)    # Ngay ket thuc tet ta
+start_date_tetta = date(start_year, 2, 8) # Ngay bat dau tet ta
+end_date_tetta = date(start_year, 2, 14)    # Ngay ket thuc tet ta
 delta_tetta = end_date_tetta - start_date_tetta  
 
 for i in range(delta_tetta.days + 1):
@@ -74,8 +74,8 @@ for i in range(delta_tetta.days + 1):
 
 ###### Gio to vua Hung - Nghi le tu 2007 #######
 
-start_date_gioto = date(start_year, 4, 29) 
-end_date_gioto = date(start_year, 5, 3)    
+start_date_gioto = date(start_year, 4, 18) 
+end_date_gioto = date(start_year, 4, 18)    
 delta_gioto = end_date_gioto - start_date_gioto   
 
 for i in range(delta_gioto.days + 1):
@@ -86,8 +86,8 @@ for i in range(delta_gioto.days + 1):
 
 
 ####### 30/04 va 01/05 ##############
-start_date_30040105 = date(start_year, 4, 29) 
-end_date_30040105 = date(start_year, 5, 3)    # perhaps date.now()
+start_date_30040105 = date(start_year, 4, 30) 
+end_date_30040105 = date(start_year, 5, 1)    # perhaps date.now()
 delta_30040105 = end_date_30040105 - start_date_30040105   # returns timedelta
 
 for i in range(delta_30040105.days + 1):
@@ -97,8 +97,8 @@ for i in range(delta_30040105.days + 1):
     print("Done record National Holiday - 30/4 - 01/05 {}".format(day))
 
 ####### 02/09 ##############
-start_date_0209 = date(start_year, 9, 4) 
-end_date_0209 = date(start_year, 9, 5)    # perhaps date.now()
+start_date_0209 = date(start_year, 9, 2) 
+end_date_0209 = date(start_year, 9, 3)    # perhaps date.now()
 delta_0209 = end_date_0209 - start_date_0209   # returns timedelta
 
 for i in range(delta_0209.days + 1):
