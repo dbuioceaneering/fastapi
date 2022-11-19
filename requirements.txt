@@ -8,5 +8,5 @@ Starred
 start
 uvicorn
 aiosqlite
-openpyxl
 requests
+openpyxl
