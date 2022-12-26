@@ -9,10 +9,12 @@ from datetime import datetime
 from fastapi.responses import FileResponse
 from fastapi.responses import StreamingResponse
 from threading import Thread
-from function import next5days, back5days, get_price_hose_SSI, get_price_hnx_SSI, rm_report_weekly
-from function_get import get_event_in_month
+from function import next5days, back5days, get_price_hose_SSI, get_price_hnx_SSI, rm_report_weekly, stock_info_52w, check_holiday
+from function_get import get_event_in_month, convert_datetime_to_timestamp
 
 database = Database("sqlite:///database/calendar.db")
+now = datetime.now()
+date_time = now.strftime("%Y-%m-%d")
 
 class startDate(BaseModel):
     startDate: str
@@ -79,16 +81,30 @@ async def fetch_data():
 
 @app.get("/rm_report")
 async def fetch_data(startDate: str):
-    rm_report_weekly(startDate)
-    file_path = "RM_Report.xlsx"
-    return FileResponse(path=file_path, filename=file_path)
+    isholiday = check_holiday(startDate)
+    if isholiday != 1:
+        checkstartDate = convert_datetime_to_timestamp(startDate)
+        checknow = convert_datetime_to_timestamp(date_time)
+        if checknow >= checkstartDate:
+            rm_report_weekly(startDate)
+            file_path = "RM_Report.xlsx"
+            return FileResponse(path=file_path, filename=file_path)
 
+@app.get("/stock_info_52w")
+async def fetch_data(startDate: str):
+    isholiday = check_holiday(startDate)
+    if isholiday != 1:
+        checkstartDate = convert_datetime_to_timestamp(startDate)
+        checknow = convert_datetime_to_timestamp(date_time)
+        if checknow >= checkstartDate:
+            stock_info_52w(startDate)
+            file_path = "rm_price_52w.xlsx"
+            return FileResponse(path=file_path, filename=file_path)
 
 @app.get("/test") #> Get method with param
 async def fetch_data(startDate: str):
     results = back5days(startDate)
     return  results
-
 
 # if __name__ == "__main__":
 #     uvicorn.run(app, host="0.0.0.0", port=8080, workers=4)

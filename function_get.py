@@ -11,6 +11,7 @@ import requests
 import json
 import calendar
 from dateutil import relativedelta
+import time
 
 ################### Number of days in month #####################
 
@@ -34,7 +35,7 @@ def days_in_month():
 def days_in_next_month():
     now = datetime.datetime.now()
     nextMonthDate = now + relativedelta.relativedelta(months=1, day=1)
-    num_of_next_month_days = calendar.monthrange(now.year, nextMonthDate.month)[1]
+    num_of_next_month_days = calendar.monthrange(nextMonthDate.year, nextMonthDate.month)[1]
     array_day_in_next_month = []
     i = 0
     while (i < num_of_next_month_days):
@@ -88,5 +89,9 @@ def get_event_in_month():
     # data = pandas.read_json('Events_in_2_months.json').set_index('id')
     data = pandas.read_json('Events_in_2_months.json')
     data.to_excel("Events_in_2_months.xlsx")
+
+def convert_datetime_to_timestamp(date_time):
+    time_stamp = int(time.mktime(datetime.datetime.strptime(date_time, "%Y-%m-%d").timetuple()))
+    return time_stamp
 
 # get_event_in_month()

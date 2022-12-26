@@ -8,11 +8,16 @@ import sqlite3
 import requests
 import json
 import os.path
+from function_get import convert_datetime_to_timestamp
+import numpy
+
 
 database = Database("sqlite:///database/calendar.db")
 data_path = os.path.join("database")
 file_open = os.path.join(data_path, "calendar.db")
 con = sqlite3.connect(file_open)
+now = datetime.now()
+date_time = now.strftime("%Y-%m-%d")
 # con = sqlite3.connect('database\calendar.db')
 
 
@@ -177,196 +182,316 @@ def get_price_hnx_SSI():
     data.to_excel("Price_HNX.xlsx")
 
 
-
 def rm_report_weekly(startDate):
 
+    isholiday = check_holiday(startDate)
+    if isholiday != 1:
     # Lay 5 ngay lien truoc
+        url = "http://127.0.0.1:8080/back5days"
 
-    url = "http://127.0.0.1:8080/back5days"
-
-    payload = json.dumps({
-    "startDate": startDate
-    })
-    headers = {
-    'accept': 'application/json',
-    'Content-Type': 'application/json'
-    }
-
-    response = requests.request("POST", url, headers=headers, data=payload)
-    json_obj = json.loads(response.text)
-    
-    # if len(json_obj) != 0:
-    t1 = json_obj[0]['t1']
-    t2 = json_obj[0]['t2']
-    t3 = json_obj[0]['t3']
-    t4 = json_obj[0]['t4']
-    t5 = json_obj[0]['t5']
-    t6 = json_obj[0]['t6']
-
-    class StockListHSX:
-        def __init__(self, stockSymbol, name, exchange):
-            self.stockSymbol = stockSymbol
-            self.name = name
-            self.exchange = exchange
-        pass
-    
-    class StockListHNX:
-        def __init__(self, stockSymbol, name, exchange):
-            self.stockSymbol = stockSymbol
-            self.name = name
-            self.exchange = exchange
-        pass
-
-    # Tao mang stock
-    url = "https://api.fireant.vn/instruments"
-    payload={}
-    headers = {}
-    response = requests.request("GET", url, headers=headers, data=payload)
-    json_obj = json.loads(response.text)
-    arrHNX = list()
-    arrHSX = list()
-    for index, item in enumerate(json_obj):
-        if len(item['symbol']) == 3:
-            if item['exchange'] == 'HNX':
-                arrHNX.append(StockListHNX(stockSymbol=item['symbol'],name=item['name'],exchange=item['exchange']))
-            elif item['exchange'] == 'HSX':
-                arrHSX.append(StockListHSX(stockSymbol=item['symbol'],name=item['name'],exchange=item['exchange']))
-    arrStock = arrHNX + arrHSX
-
-
-    rm_report = []
-    for index, item in enumerate(arrStock):
-        # print("Endpoint /rm_report, processing symbol {} - {}".format(arrStock[index].stockSymbol, datetime.now()))
-
-        url_price = "https://restv2.fireant.vn/symbols/{}/historical-quotes?startDate={}&endDate={}&offset=0&limit=30".format(arrStock[index].stockSymbol,t6,t1)
-
-        payload_price={}
-        headers_price = {
-        'authority': 'restv2.fireant.vn',
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'en-US,en;q=0.9,vi;q=0.8',
-        'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkdYdExONzViZlZQakdvNERWdjV4QkRITHpnSSIsImtpZCI6IkdYdExONzViZlZQakdvNERWdjV4QkRITHpnSSJ9.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmZpcmVhbnQudm4iLCJhdWQiOiJodHRwczovL2FjY291bnRzLmZpcmVhbnQudm4vcmVzb3VyY2VzIiwiZXhwIjoxODg5NjIyNTMwLCJuYmYiOjE1ODk2MjI1MzAsImNsaWVudF9pZCI6ImZpcmVhbnQudHJhZGVzdGF0aW9uIiwic2NvcGUiOlsiYWNhZGVteS1yZWFkIiwiYWNhZGVteS13cml0ZSIsImFjY291bnRzLXJlYWQiLCJhY2NvdW50cy13cml0ZSIsImJsb2ctcmVhZCIsImNvbXBhbmllcy1yZWFkIiwiZmluYW5jZS1yZWFkIiwiaW5kaXZpZHVhbHMtcmVhZCIsImludmVzdG9wZWRpYS1yZWFkIiwib3JkZXJzLXJlYWQiLCJvcmRlcnMtd3JpdGUiLCJwb3N0cy1yZWFkIiwicG9zdHMtd3JpdGUiLCJzZWFyY2giLCJzeW1ib2xzLXJlYWQiLCJ1c2VyLWRhdGEtcmVhZCIsInVzZXItZGF0YS13cml0ZSIsInVzZXJzLXJlYWQiXSwianRpIjoiMjYxYTZhYWQ2MTQ5Njk1ZmJiYzcwODM5MjM0Njc1NWQifQ.dA5-HVzWv-BRfEiAd24uNBiBxASO-PAyWeWESovZm_hj4aXMAZA1-bWNZeXt88dqogo18AwpDQ-h6gefLPdZSFrG5umC1dVWaeYvUnGm62g4XS29fj6p01dhKNNqrsu5KrhnhdnKYVv9VdmbmqDfWR8wDgglk5cJFqalzq6dJWJInFQEPmUs9BW_Zs8tQDn-i5r4tYq2U8vCdqptXoM7YgPllXaPVDeccC9QNu2Xlp9WUvoROzoQXg25lFub1IYkTrM66gJ6t9fJRZToewCt495WNEOQFa_rwLCZ1QwzvL0iYkONHS_jZ0BOhBCdW9dWSawD6iF1SIQaFROvMDH1rg',
-        'origin': 'https://fireant.vn',
-        'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-site',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+        payload = json.dumps({
+        "startDate": startDate
+        })
+        headers = {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
         }
 
-        response_price = requests.request("GET", url_price, headers=headers_price, data=payload_price)
-        json_obj_price = json.loads(response_price.text)
-
-
-        if len(json_obj_price) == 6:
-            volume_t1 = json_obj_price[0]['totalVolume']
-            volume_t2 = json_obj_price[1]['totalVolume']
-            volume_t3 = json_obj_price[2]['totalVolume']
-            volume_t4 = json_obj_price[3]['totalVolume']
-            volume_t5 = json_obj_price[4]['totalVolume']
-            volume_t6 = json_obj_price[5]['totalVolume']
-            closeprice_t6 = json_obj_price[5]['priceClose']
-        elif len(json_obj_price) == 5:
-            volume_t1 = json_obj_price[0]['totalVolume']
-            volume_t2 = json_obj_price[1]['totalVolume']
-            volume_t3 = json_obj_price[2]['totalVolume']
-            volume_t4 = json_obj_price[3]['totalVolume']
-            volume_t5 = json_obj_price[4]['totalVolume']
-            volume_t6 = 0
-            closeprice_t6 = 0
-        elif len(json_obj_price) == 4:
-            volume_t1 = json_obj_price[0]['totalVolume']
-            volume_t2 = json_obj_price[1]['totalVolume']
-            volume_t3 = json_obj_price[2]['totalVolume']
-            volume_t4 = json_obj_price[3]['totalVolume']
-            volume_t5 = 0
-            volume_t6 = 0
-            closeprice_t6 = 0
-        elif len(json_obj_price) == 3:
-            volume_t1 = json_obj_price[0]['totalVolume']
-            volume_t2 = json_obj_price[1]['totalVolume']
-            volume_t3 = json_obj_price[2]['totalVolume']
-            volume_t4 = 0
-            volume_t5 = 0
-            volume_t6 = 0
-            closeprice_t6 = 0
-        elif len(json_obj_price) == 2:
-            volume_t1 = json_obj_price[0]['totalVolume']
-            volume_t2 = json_obj_price[1]['totalVolume']
-            volume_t3 = 0
-            volume_t4 = 0
-            volume_t5 = 0
-            volume_t6 = 0
-            closeprice_t6 = 0
-        elif len(json_obj_price) == 1:
-            volume_t1 = json_obj_price[0]['totalVolume']
-            volume_t2 = 0
-            volume_t3 = 0
-            volume_t4 = 0
-            volume_t5 = 0
-            volume_t6 = 0
-            closeprice_t6 = 0
-        elif len(json_obj_price) == 0:
-            break
+        response = requests.request("POST", url, headers=headers, data=payload)
+        json_obj = json.loads(response.text)
         
+        # if len(json_obj) != 0:
+        t1 = json_obj[0]['t1']
+        t2 = json_obj[0]['t2']
+        t3 = json_obj[0]['t3']
+        t4 = json_obj[0]['t4']
+        t5 = json_obj[0]['t5']
+        t6 = json_obj[0]['t6']
+
+        class StockListHSX:
+            def __init__(self, stockSymbol, name, exchange):
+                self.stockSymbol = stockSymbol
+                self.name = name
+                self.exchange = exchange
+            pass
         
+        class StockListHNX:
+            def __init__(self, stockSymbol, name, exchange):
+                self.stockSymbol = stockSymbol
+                self.name = name
+                self.exchange = exchange
+            pass
 
-        url_profile = "https://restv2.fireant.vn/symbols/{}/profile".format(arrStock[index].stockSymbol)
-        payload_profile={}
-        headers_profile = {
-        'authority': 'restv2.fireant.vn',
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'en-US,en;q=0.9,vi;q=0.8',
-        'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkdYdExONzViZlZQakdvNERWdjV4QkRITHpnSSIsImtpZCI6IkdYdExONzViZlZQakdvNERWdjV4QkRITHpnSSJ9.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmZpcmVhbnQudm4iLCJhdWQiOiJodHRwczovL2FjY291bnRzLmZpcmVhbnQudm4vcmVzb3VyY2VzIiwiZXhwIjoxODg5NjIyNTMwLCJuYmYiOjE1ODk2MjI1MzAsImNsaWVudF9pZCI6ImZpcmVhbnQudHJhZGVzdGF0aW9uIiwic2NvcGUiOlsiYWNhZGVteS1yZWFkIiwiYWNhZGVteS13cml0ZSIsImFjY291bnRzLXJlYWQiLCJhY2NvdW50cy13cml0ZSIsImJsb2ctcmVhZCIsImNvbXBhbmllcy1yZWFkIiwiZmluYW5jZS1yZWFkIiwiaW5kaXZpZHVhbHMtcmVhZCIsImludmVzdG9wZWRpYS1yZWFkIiwib3JkZXJzLXJlYWQiLCJvcmRlcnMtd3JpdGUiLCJwb3N0cy1yZWFkIiwicG9zdHMtd3JpdGUiLCJzZWFyY2giLCJzeW1ib2xzLXJlYWQiLCJ1c2VyLWRhdGEtcmVhZCIsInVzZXItZGF0YS13cml0ZSIsInVzZXJzLXJlYWQiXSwianRpIjoiMjYxYTZhYWQ2MTQ5Njk1ZmJiYzcwODM5MjM0Njc1NWQifQ.dA5-HVzWv-BRfEiAd24uNBiBxASO-PAyWeWESovZm_hj4aXMAZA1-bWNZeXt88dqogo18AwpDQ-h6gefLPdZSFrG5umC1dVWaeYvUnGm62g4XS29fj6p01dhKNNqrsu5KrhnhdnKYVv9VdmbmqDfWR8wDgglk5cJFqalzq6dJWJInFQEPmUs9BW_Zs8tQDn-i5r4tYq2U8vCdqptXoM7YgPllXaPVDeccC9QNu2Xlp9WUvoROzoQXg25lFub1IYkTrM66gJ6t9fJRZToewCt495WNEOQFa_rwLCZ1QwzvL0iYkONHS_jZ0BOhBCdW9dWSawD6iF1SIQaFROvMDH1rg',
-        'origin': 'https://fireant.vn',
-        'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-site',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-        }
+        # Tao mang stock
+        url = "https://api.fireant.vn/instruments"
+        payload={}
+        headers = {}
+        response = requests.request("GET", url, headers=headers, data=payload)
+        json_obj = json.loads(response.text)
+        arrHNX = list()
+        arrHSX = list()
+        for index, item in enumerate(json_obj):
+            if len(item['symbol']) == 3:
+                if item['exchange'] == 'HNX':
+                    arrHNX.append(StockListHNX(stockSymbol=item['symbol'],name=item['name'],exchange=item['exchange']))
+                elif item['exchange'] == 'HSX':
+                    arrHSX.append(StockListHSX(stockSymbol=item['symbol'],name=item['name'],exchange=item['exchange']))
+        arrStock = arrHNX + arrHSX
 
-        rm_dict = {
-        'stockSymbol':'',
-        'name':'',
-        'exchange':'',
-        'shareoutstanding':'',
-        'marketcap_{}'.format(t6):'',
-        'volume_{}'.format(t6):'',
-        'volume_{}'.format(t5):'',
-        'volume_{}'.format(t4):'',
-        'volume_{}'.format(t3):'',
-        'volume_{}'.format(t2):'',
-        'volume_{}'.format(t1):''
-        }
 
-        response_profile = requests.request("GET", url_profile, headers=headers_profile, data=payload_profile)
-        json_obj_profile = json.loads(response_profile.text)
-        shareoutstanding = json_obj_profile['listingVolume']
-        # rm_report.append(reportrm(stockSymbol=arrStock[index].stockSymbol,exchange=arrStock[index].exchange,name=arrStock[index].name,shareoutstanding=shareoutstanding,marketcap=closeprice_t1*shareoutstanding ,volume_t1=volume_t1,volume_t2=volume_t2,volume_t3=volume_t3,volume_t4=volume_t4,volume_t5=volume_t5))
-        rm_dict['stockSymbol'] = arrStock[index].stockSymbol
-        rm_dict['exchange'] = arrStock[index].exchange
-        rm_dict['name'] = arrStock[index].name
-        rm_dict['shareoutstanding'] = shareoutstanding
-        rm_dict['marketcap_{}'.format(t6)] = closeprice_t6 * shareoutstanding
-        rm_dict['volume_{}'.format(t6)] = volume_t6
-        rm_dict['volume_{}'.format(t5)] = volume_t5
-        rm_dict['volume_{}'.format(t4)] = volume_t4
-        rm_dict['volume_{}'.format(t3)] = volume_t3
-        rm_dict['volume_{}'.format(t2)] = volume_t2
-        rm_dict['volume_{}'.format(t1)] = volume_t1
-        rm_report.append(rm_dict)
-        # print(rm_report)
-    
+        rm_report = []
+        for index, item in enumerate(arrStock):
+            # print("Endpoint /rm_report, processing symbol {} - {}".format(arrStock[index].stockSymbol, datetime.now()))
 
-    stringdata = json.dumps(rm_report).encode('utf8')
-    with open("RM_Report.json", "w") as json_file:
-        json_file.write(stringdata.decode('utf8'))
-    data = pandas.read_json('RM_Report.json')
-    data.to_excel("RM_Report.xlsx")
+            url_price = "https://restv2.fireant.vn/symbols/{}/historical-quotes?startDate={}&endDate={}&offset=0&limit=30".format(arrStock[index].stockSymbol,t6,t1)
 
-# rm_report_weekly("2022-11-14")
+            payload_price={}
+            headers_price = {
+            'authority': 'restv2.fireant.vn',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9,vi;q=0.8',
+            'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkdYdExONzViZlZQakdvNERWdjV4QkRITHpnSSIsImtpZCI6IkdYdExONzViZlZQakdvNERWdjV4QkRITHpnSSJ9.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmZpcmVhbnQudm4iLCJhdWQiOiJodHRwczovL2FjY291bnRzLmZpcmVhbnQudm4vcmVzb3VyY2VzIiwiZXhwIjoxODg5NjIyNTMwLCJuYmYiOjE1ODk2MjI1MzAsImNsaWVudF9pZCI6ImZpcmVhbnQudHJhZGVzdGF0aW9uIiwic2NvcGUiOlsiYWNhZGVteS1yZWFkIiwiYWNhZGVteS13cml0ZSIsImFjY291bnRzLXJlYWQiLCJhY2NvdW50cy13cml0ZSIsImJsb2ctcmVhZCIsImNvbXBhbmllcy1yZWFkIiwiZmluYW5jZS1yZWFkIiwiaW5kaXZpZHVhbHMtcmVhZCIsImludmVzdG9wZWRpYS1yZWFkIiwib3JkZXJzLXJlYWQiLCJvcmRlcnMtd3JpdGUiLCJwb3N0cy1yZWFkIiwicG9zdHMtd3JpdGUiLCJzZWFyY2giLCJzeW1ib2xzLXJlYWQiLCJ1c2VyLWRhdGEtcmVhZCIsInVzZXItZGF0YS13cml0ZSIsInVzZXJzLXJlYWQiXSwianRpIjoiMjYxYTZhYWQ2MTQ5Njk1ZmJiYzcwODM5MjM0Njc1NWQifQ.dA5-HVzWv-BRfEiAd24uNBiBxASO-PAyWeWESovZm_hj4aXMAZA1-bWNZeXt88dqogo18AwpDQ-h6gefLPdZSFrG5umC1dVWaeYvUnGm62g4XS29fj6p01dhKNNqrsu5KrhnhdnKYVv9VdmbmqDfWR8wDgglk5cJFqalzq6dJWJInFQEPmUs9BW_Zs8tQDn-i5r4tYq2U8vCdqptXoM7YgPllXaPVDeccC9QNu2Xlp9WUvoROzoQXg25lFub1IYkTrM66gJ6t9fJRZToewCt495WNEOQFa_rwLCZ1QwzvL0iYkONHS_jZ0BOhBCdW9dWSawD6iF1SIQaFROvMDH1rg',
+            'origin': 'https://fireant.vn',
+            'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+            }
+
+            response_price = requests.request("GET", url_price, headers=headers_price, data=payload_price)
+            json_obj_price = json.loads(response_price.text)
+
+
+            if len(json_obj_price) == 6:
+                volume_t1 = json_obj_price[0]['totalVolume']
+                volume_t2 = json_obj_price[1]['totalVolume']
+                volume_t3 = json_obj_price[2]['totalVolume']
+                volume_t4 = json_obj_price[3]['totalVolume']
+                volume_t5 = json_obj_price[4]['totalVolume']
+                volume_t6 = json_obj_price[5]['totalVolume']
+                closeprice_t6 = json_obj_price[5]['priceClose']
+            elif len(json_obj_price) == 5:
+                volume_t1 = json_obj_price[0]['totalVolume']
+                volume_t2 = json_obj_price[1]['totalVolume']
+                volume_t3 = json_obj_price[2]['totalVolume']
+                volume_t4 = json_obj_price[3]['totalVolume']
+                volume_t5 = json_obj_price[4]['totalVolume']
+                volume_t6 = 0
+                closeprice_t6 = 0
+            elif len(json_obj_price) == 4:
+                volume_t1 = json_obj_price[0]['totalVolume']
+                volume_t2 = json_obj_price[1]['totalVolume']
+                volume_t3 = json_obj_price[2]['totalVolume']
+                volume_t4 = json_obj_price[3]['totalVolume']
+                volume_t5 = 0
+                volume_t6 = 0
+                closeprice_t6 = 0
+            elif len(json_obj_price) == 3:
+                volume_t1 = json_obj_price[0]['totalVolume']
+                volume_t2 = json_obj_price[1]['totalVolume']
+                volume_t3 = json_obj_price[2]['totalVolume']
+                volume_t4 = 0
+                volume_t5 = 0
+                volume_t6 = 0
+                closeprice_t6 = 0
+            elif len(json_obj_price) == 2:
+                volume_t1 = json_obj_price[0]['totalVolume']
+                volume_t2 = json_obj_price[1]['totalVolume']
+                volume_t3 = 0
+                volume_t4 = 0
+                volume_t5 = 0
+                volume_t6 = 0
+                closeprice_t6 = 0
+            elif len(json_obj_price) == 1:
+                volume_t1 = json_obj_price[0]['totalVolume']
+                volume_t2 = 0
+                volume_t3 = 0
+                volume_t4 = 0
+                volume_t5 = 0
+                volume_t6 = 0
+                closeprice_t6 = 0
+            elif len(json_obj_price) == 0:
+                break
+            
+            
+
+            url_profile = "https://restv2.fireant.vn/symbols/{}/profile".format(arrStock[index].stockSymbol)
+            payload_profile={}
+            headers_profile = {
+            'authority': 'restv2.fireant.vn',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9,vi;q=0.8',
+            'authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkdYdExONzViZlZQakdvNERWdjV4QkRITHpnSSIsImtpZCI6IkdYdExONzViZlZQakdvNERWdjV4QkRITHpnSSJ9.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmZpcmVhbnQudm4iLCJhdWQiOiJodHRwczovL2FjY291bnRzLmZpcmVhbnQudm4vcmVzb3VyY2VzIiwiZXhwIjoxODg5NjIyNTMwLCJuYmYiOjE1ODk2MjI1MzAsImNsaWVudF9pZCI6ImZpcmVhbnQudHJhZGVzdGF0aW9uIiwic2NvcGUiOlsiYWNhZGVteS1yZWFkIiwiYWNhZGVteS13cml0ZSIsImFjY291bnRzLXJlYWQiLCJhY2NvdW50cy13cml0ZSIsImJsb2ctcmVhZCIsImNvbXBhbmllcy1yZWFkIiwiZmluYW5jZS1yZWFkIiwiaW5kaXZpZHVhbHMtcmVhZCIsImludmVzdG9wZWRpYS1yZWFkIiwib3JkZXJzLXJlYWQiLCJvcmRlcnMtd3JpdGUiLCJwb3N0cy1yZWFkIiwicG9zdHMtd3JpdGUiLCJzZWFyY2giLCJzeW1ib2xzLXJlYWQiLCJ1c2VyLWRhdGEtcmVhZCIsInVzZXItZGF0YS13cml0ZSIsInVzZXJzLXJlYWQiXSwianRpIjoiMjYxYTZhYWQ2MTQ5Njk1ZmJiYzcwODM5MjM0Njc1NWQifQ.dA5-HVzWv-BRfEiAd24uNBiBxASO-PAyWeWESovZm_hj4aXMAZA1-bWNZeXt88dqogo18AwpDQ-h6gefLPdZSFrG5umC1dVWaeYvUnGm62g4XS29fj6p01dhKNNqrsu5KrhnhdnKYVv9VdmbmqDfWR8wDgglk5cJFqalzq6dJWJInFQEPmUs9BW_Zs8tQDn-i5r4tYq2U8vCdqptXoM7YgPllXaPVDeccC9QNu2Xlp9WUvoROzoQXg25lFub1IYkTrM66gJ6t9fJRZToewCt495WNEOQFa_rwLCZ1QwzvL0iYkONHS_jZ0BOhBCdW9dWSawD6iF1SIQaFROvMDH1rg',
+            'origin': 'https://fireant.vn',
+            'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+            }
+
+            rm_dict = {
+            'stockSymbol':'',
+            'name':'',
+            'exchange':'',
+            'shareoutstanding':'',
+            'marketcap_{}'.format(t6):'',
+            'volume_{}'.format(t6):'',
+            'volume_{}'.format(t5):'',
+            'volume_{}'.format(t4):'',
+            'volume_{}'.format(t3):'',
+            'volume_{}'.format(t2):'',
+            'volume_{}'.format(t1):''
+            }
+
+            response_profile = requests.request("GET", url_profile, headers=headers_profile, data=payload_profile)
+            json_obj_profile = json.loads(response_profile.text)
+            shareoutstanding = json_obj_profile['listingVolume']
+            # rm_report.append(reportrm(stockSymbol=arrStock[index].stockSymbol,exchange=arrStock[index].exchange,name=arrStock[index].name,shareoutstanding=shareoutstanding,marketcap=closeprice_t1*shareoutstanding ,volume_t1=volume_t1,volume_t2=volume_t2,volume_t3=volume_t3,volume_t4=volume_t4,volume_t5=volume_t5))
+            rm_dict['stockSymbol'] = arrStock[index].stockSymbol
+            rm_dict['exchange'] = arrStock[index].exchange
+            rm_dict['name'] = arrStock[index].name
+            rm_dict['shareoutstanding'] = shareoutstanding
+            rm_dict['marketcap_{}'.format(t6)] = closeprice_t6 * shareoutstanding
+            rm_dict['volume_{}'.format(t6)] = volume_t6
+            rm_dict['volume_{}'.format(t5)] = volume_t5
+            rm_dict['volume_{}'.format(t4)] = volume_t4
+            rm_dict['volume_{}'.format(t3)] = volume_t3
+            rm_dict['volume_{}'.format(t2)] = volume_t2
+            rm_dict['volume_{}'.format(t1)] = volume_t1
+            rm_report.append(rm_dict)
+
+        stringdata = json.dumps(rm_report).encode('utf8')
+        with open("RM_Report.json", "w") as json_file:
+            json_file.write(stringdata.decode('utf8'))
+        data = pandas.read_json('RM_Report.json')
+        data.to_excel("RM_Report.xlsx")
+
+
+def stock_info_52w(startDate):
+    result = []
+    isholiday = check_holiday(startDate)
+    if isholiday != 1:
+        cur = con.cursor()
+        date_obj = pandas.to_datetime(startDate, format='%Y-%m-%d')
+        date_obj -= timedelta(days=400)
+        str_back400days = datetime.strftime(date_obj,"%Y-%m-%d")
+        cur.execute("select datekey from date where datekey between '{}' and '{}' and isholiday = 0 order by datekey desc limit 262 ".format(str_back400days,startDate))
+        result = cur.fetchall()
+        arr_result = numpy.array(result)
+        t1_temp = arr_result[1]
+        t1 = t1_temp[0]
+        t260_temp = arr_result[260]
+        t260 = t260_temp[0]
+        t261_temp = arr_result[261]
+        t261 = t261_temp[0]
+
+        t1_timestamp = convert_datetime_to_timestamp(t1) + + 82800 # Tinh den cuoi ngay T1
+        t260_timestamp = convert_datetime_to_timestamp(t260)
+        t261_timestamp = convert_datetime_to_timestamp(t261)
+
+
+        class StockListHSX:
+            def __init__(self, symbol, name, exchange):
+                self.symbol = symbol
+                self.name = name
+                self.exchange = exchange
+            pass
+        
+        class StockListHNX:
+            def __init__(self, symbol, name, exchange):
+                self.symbol = symbol
+                self.name = name
+                self.exchange = exchange
+            pass
+
+        # Tao mang stock
+        url = "https://api.fireant.vn/instruments"
+        payload={}
+        headers = {}
+        response = requests.request("GET", url, headers=headers, data=payload)
+        json_obj = json.loads(response.text)
+        arrHNX = list()
+        arrHSX = list()
+        for index, item in enumerate(json_obj):
+            if len(item['symbol']) == 3:
+                if item['exchange'] == 'HNX':
+                    arrHNX.append(StockListHNX(symbol=item['symbol'],name=item['name'],exchange=item['exchange']))
+                elif item['exchange'] == 'HSX':
+                    arrHSX.append(StockListHSX(symbol=item['symbol'],name=item['name'],exchange=item['exchange']))
+        allStockArray = arrHNX + arrHSX
+
+        rm_price_52w = []
+
+        # Get close price in range time
+        for index2, item2 in enumerate(allStockArray):
+            rm_dict = {
+            'stockSymbol':'',
+            'clientName':'',
+            'exchange':'',
+            'price_avegare_52w':'',
+            'price_max_52w':'',
+            'price_min_52w':''
+            'close_price_{}'.format(t1),
+            'fromDate':'',
+            'toDate':'',
+            'no_of_trading_date':''
+
+            }
+            url2 = "https://iboard.ssi.com.vn/dchart/api/history?resolution=D&symbol={}&from={}&to={}".format(allStockArray[index2].symbol,t260_timestamp,t1_timestamp)
+            payload2={}
+            headers2 = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Connection': 'keep-alive',
+            'Cookie': '_ga=GA1.3.799920663.1657016973; _gid=GA1.3.305791547.1657016973; skipQuerySector=1; skipQueryAllStock=1; trading_view_chart_user_id=119641_1657017007501',
+            'Referer': 'https://iboard.ssi.com.vn/chart/?symbol=ACB&language=vi&interval=D&theme=classic&target=tradingViewStockDetail&autosave=1',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+            'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"'
+            }
+
+            response2 = requests.request("GET", url2, headers=headers2, data=payload2)
+            if response2.headers.get('Content-Type').startswith('application/json') == True:
+                json_obj2 = json.loads(response2.text)
+                string_price = json_obj2['c']
+                # print (len(string_price))
+                if len(string_price) > 0:
+                    chieudai = len(string_price)
+                    for index3 in range (0,len(string_price)):
+                        string_price[index3] = float(string_price[index3])
+                    price = string_price[chieudai-1]
+                    # print("Gia ngay {} la {}".format(t1,price))
+                    average_of_the_array = numpy.array(string_price)
+                    average_of_the_array1 = numpy.mean(average_of_the_array)
+                    max_price_in_array = numpy.max(average_of_the_array)
+                    min_price_in_array = numpy.min(average_of_the_array)
+                    
+                rm_dict['stockSymbol'] = allStockArray[index2].symbol
+                rm_dict['exchange'] = allStockArray[index2].exchange
+                rm_dict['clientName'] = allStockArray[index2].name
+                rm_dict['price_avegare_52w'] = average_of_the_array1
+                rm_dict['price_max_52w'] = max_price_in_array
+                rm_dict['price_min_52w'] = min_price_in_array
+                rm_dict['close_price_{}'.format(t1)] = price
+                rm_dict['fromDate'] = t260
+                rm_dict['toDate'] = t1
+                rm_dict['no_of_trading_date'] = len(string_price)
+                rm_price_52w.append(rm_dict)
+        
+        stringdata = json.dumps(rm_price_52w).encode('utf8')
+        with open("rm_price_52w.json", "w") as json_file:
+            json_file.write(stringdata.decode('utf8'))
+        data = pandas.read_json('rm_price_52w.json')
+        data.to_excel("rm_price_52w.xlsx")
+
+# stock_info_52w("2022-12-19")        
